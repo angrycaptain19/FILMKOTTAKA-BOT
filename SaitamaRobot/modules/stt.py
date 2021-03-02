@@ -39,10 +39,11 @@ async def is_register_admin(chat, user):
 async def _(event):
     if event.fwd_from:
         return
-    if event.is_group:
-     if not (await is_register_admin(event.input_chat, event.message.sender_id)):
-       await event.reply(" Hey! You are not admin so you can't use this command here \nBut can use it in my pm 🙈")
-       return
+    if event.is_group and not (
+        await is_register_admin(event.input_chat, event.message.sender_id)
+    ):
+        await event.reply(" Hey! You are not admin so you can't use this command here \nBut can use it in my pm 🙈")
+        return
 
     start = datetime.now()
     if not os.path.isdir(TEMP_DOWNLOAD_DIRECTORY):

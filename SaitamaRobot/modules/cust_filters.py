@@ -57,7 +57,7 @@ def list_handlers(update, context):
     user = update.effective_user
 
     conn = connected(context.bot, update, chat, user.id, need_admin=False)
-    if not conn is False:
+    if conn is not False:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
         filter_list = "*Filter in {}:*\n"
@@ -108,16 +108,12 @@ def filters(update, context):
         1)  # use python's maxsplit to separate Cmd, keyword, and reply_text
 
     conn = connected(context.bot, update, chat, user.id)
-    if not conn is False:
+    if conn is not False:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         chat_id = update.effective_chat.id
-        if chat.type == "private":
-            chat_name = "local filters"
-        else:
-            chat_name = chat.title
-
+        chat_name = "local filters" if chat.type == "private" else chat.title
     if not msg.reply_to_message and len(args) < 2:
         send_message(
             update.effective_message,
@@ -228,16 +224,12 @@ def stop_filter(update, context):
     args = update.effective_message.text.split(None, 1)
 
     conn = connected(context.bot, update, chat, user.id)
-    if not conn is False:
+    if conn is not False:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         chat_id = update.effective_chat.id
-        if chat.type == "private":
-            chat_name = "Local filters"
-        else:
-            chat_name = chat.title
-
+        chat_name = "Local filters" if chat.type == "private" else chat.title
     if len(args) < 2:
         send_message(update.effective_message, "What should i stop?")
         return
@@ -300,10 +292,7 @@ def reply_filter(update, context):
                 if filt.reply_text:
                     if '%%%' in filt.reply_text:
                         split = filt.reply_text.split('%%%')
-                        if all(split):
-                            text = random.choice(split)
-                        else:
-                            text = filt.reply_text
+                        text = random.choice(split) if all(split) else filt.reply_text
                     else:
                         text = filt.reply_text
                     if text.startswith('~!') and text.endswith('!~'):
@@ -320,11 +309,10 @@ def reply_filter(update, context):
                                     chat.id,
                                     "Message couldn't be sent, Is the sticker id valid?"
                                 )
-                                return
                             else:
                                 LOGGER.exception("Error in filters: " +
                                                  excp.message)
-                                return
+                            return
                     valid_format = escape_invalid_curly_brackets(
                         text, VALID_WELCOME_FORMATTERS)
                     if valid_format:
@@ -391,7 +379,6 @@ def reply_filter(update, context):
                             except BadRequest as excp:
                                 LOGGER.exception("Failed to send message: " +
                                                  excp.message)
-                                pass
                 else:
                     try:
                         ENUM_FUNC_MAP[filt.file_type](
@@ -408,7 +395,6 @@ def reply_filter(update, context):
                             message,
                             "I don't have the permission to send the content of the filter."
                         )
-                break
             else:
                 if filt.is_sticker:
                     message.reply_sticker(filt.reply)
@@ -447,7 +433,6 @@ def reply_filter(update, context):
                             except BadRequest as excp:
                                 LOGGER.exception("Error in filters: " +
                                                  excp.message)
-                                pass
                         elif excp.message == "Reply message not found":
                             try:
                                 context.bot.send_message(
@@ -460,7 +445,6 @@ def reply_filter(update, context):
                             except BadRequest as excp:
                                 LOGGER.exception("Error in filters: " +
                                                  excp.message)
-                                pass
                         else:
                             try:
                                 send_message(
@@ -470,7 +454,6 @@ def reply_filter(update, context):
                             except BadRequest as excp:
                                 LOGGER.exception("Error in filters: " +
                                                  excp.message)
-                                pass
                             LOGGER.warning("Message %s could not be parsed",
                                            str(filt.reply))
                             LOGGER.exception(
@@ -485,8 +468,8 @@ def reply_filter(update, context):
                         send_message(update.effective_message, filt.reply)
                     except BadRequest as excp:
                         LOGGER.exception("Error in filters: " + excp.message)
-                        pass
-                break
+
+            break
 
 
 @run_async

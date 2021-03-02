@@ -141,7 +141,7 @@ def report(update: Update, context: CallbackContext) -> str:
 
             if sql.user_should_report(admin.user.id):
                 try:
-                    if not chat.type == Chat.SUPERGROUP:
+                    if chat.type != Chat.SUPERGROUP:
                         bot.send_message(
                             admin.user.id,
                             msg + link,
@@ -206,10 +206,9 @@ def __chat_settings__(chat_id, _):
 
 def __user_settings__(user_id):
     if sql.user_should_report(user_id) is True:
-        text = "You will receive reports from chats you're admin."
+        return "You will receive reports from chats you're admin."
     else:
-        text = "You will *not* receive reports from chats you're admin."
-    return text
+        return "You will *not* receive reports from chats you're admin."
 
 
 def buttons(update: Update, context: CallbackContext):

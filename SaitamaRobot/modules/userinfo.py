@@ -263,8 +263,6 @@ def info(update: Update, context: CallbackContext):
             text += "\n\n<b>This person is Spamwatched!</b>"
             text += f"\nReason: <pre>{spamwtc.reason}</pre>"
             text += "\nAppeal at @SpamWatchSupport"
-        else:
-            pass
     except:
         pass  # don't crash if api is down somehow...
 
@@ -345,11 +343,7 @@ def about_me(update: Update, context: CallbackContext):
     message = update.effective_message
     user_id = extract_user(message, args)
 
-    if user_id:
-        user = bot.get_chat(user_id)
-    else:
-        user = message.from_user
-
+    user = bot.get_chat(user_id) if user_id else message.from_user
     info = sql.get_user_me_info(user.id)
 
     if info:
@@ -404,8 +398,13 @@ def stats(update: Update, context: CallbackContext):
     process = subprocess.Popen(
         "neofetch --stdout", shell=True, text=True, stdout=subprocess.PIPE)
     output = process.communicate()[0]
-    stats = "<b>Current stats:</b>\n" + "\n" + output + "\n".join(
-        [mod.__stats__() for mod in STATS])
+    stats = (
+        "<b>Current stats:</b>\n"
+        + "\n"
+        + output
+        + "\n".join(mod.__stats__() for mod in STATS)
+    )
+
     result = re.sub(r'(\d+)', r'<code>\1</code>', stats)
     update.effective_message.reply_text(result, parse_mode=ParseMode.HTML)
 
@@ -416,11 +415,7 @@ def about_bio(update: Update, context: CallbackContext):
     message = update.effective_message
 
     user_id = extract_user(message, args)
-    if user_id:
-        user = bot.get_chat(user_id)
-    else:
-        user = message.from_user
-
+    user = bot.get_chat(user_id) if user_id else message.from_user
     info = sql.get_user_bio(user.id)
 
     if info:
